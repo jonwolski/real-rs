@@ -5,6 +5,19 @@
 use std::ops::Add;
 use std::ops::Sub;
 
+
+#[macro_export]
+macro_rules! r64 {
+    (-0.0) => {Zero(-0.0)};
+    (0.0) => {Zero(0.0)};
+    (0) => {Zero(0.0)};
+    (-0) => {Zero(0.0)};
+    (-$x:expr) => {Negative(-$x)};
+    ($x:expr) => {Positive($x)};
+}
+
+
+
 //enum OptionReal {
 //    NaN,
 //    Real
@@ -91,6 +104,32 @@ impl Sub<Positive> for Zero {
     }
 }
 
+impl Add for Negative {
+    type Output = Negative;
+
+    fn add(self, other: Self) -> Self::Output {
+       Negative(self.0 + other.0)
+    }
+}
+
+impl Add<Zero> for Negative {
+    type Output = Negative;
+
+    fn add(self, _other: Zero) -> Self::Output {
+      self
+    }
+}
+
+impl Add<Positive> for Negative {
+    type Output = Negative;
+
+    fn add(self, _other: Positive) -> Self::Output {
+      unimplemented!();
+    }
+}
+
+
+
 
 #[cfg(test)]
 mod tests {
@@ -101,16 +140,16 @@ mod tests {
 
         #[test]
         fn plus_positive() {
-            let r0 = Positive(2.0);
-            let r1 = Positive(3.5);
+            let r0 = r64!(2.0);
+            let r1 = r64!(3.5);
             let expected = Positive(2.0 + 3.5);
             assert_eq!(r0 + r1, expected);
         }
 
         #[test]
         fn plus_zero() {
-            let r0 = Positive(2.0);
-            let r1 = Zero(0.0);
+            let r0 = r64!(2.0);
+            let r1 = r64!(0.0);
             let expected = Positive(2.0 + 0.0);
             assert_eq!(r0 + r1, expected);
         }
@@ -127,16 +166,16 @@ mod tests {
 
         #[test]
         fn minus_zero() {
-            let r0 = Positive(2.0);
-            let r1 = Zero(0.0);
+            let r0 = r64!(2.0);
+            let r1 = r64!(0.0);
             let expected = Positive(2.0 - 0.0);
             assert_eq!(r0 - r1, expected);
         }
 
         #[test]
         fn minus_negative() {
-            let r0 = Positive(2.0);
-            let r1 = Negative(-3.5);
+            let r0 = r64!(2.0);
+            let r1 = r64!(-3.5);
             let expected = Positive(2.0 - -3.5);
             assert_eq!(r0 - r1, expected);
         }
@@ -147,34 +186,52 @@ mod tests {
 
         #[test]
         fn plus_positive() {
-            let r0 = Zero(0.0);
-            let r1 = Positive(2.0);
+            let r0 = r64!(0.0);
+            let r1 = r64!(2.0);
             let expected = Positive(0.0 + 2.0);
             assert_eq!(r0 + r1, expected);
         }
 
         #[test]
         fn plus_zero() {
-            let r0 = Zero(0.0);
-            let r1 = Zero(0.0);
+            let r0 = r64!(0.0);
+            let r1 = r64!(0.0);
             let expected = Zero(0.0 + 0.0);
             assert_eq!(r0 + r1, expected);
         }
 
         #[test]
         fn plus_negative() {
-            let r0 = Zero(0.0);
-            let r1 = Negative(-1.0);
+            let r0 = r64!(0.0);
+            let r1 = r64!(-1.0);
             let expected = Negative(0.0 + -1.0);
             assert_eq!(r0 + r1, expected);
         }
+    }
 
-//        #[test]
-//        fn minus_positive() {
-//            let r0 = Zero(0.0);
-//            let r1 = Positive(2.0);
-//            let expected = Negative(0.0 - 2.0);
-//            assert_eq!(r0 - r1, expected);
-//        }
+    mod negative {
+        use super::*;
+
+        #[test]
+        fn plus_positive() {
+	    unimplemented!();
+        }
+
+        #[test]
+        fn plus_zero() {
+            let r0 = r64!(-1.0);
+            let r1 = r64!(0.0);
+            let expected = Negative(-1.0 + 0.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn plus_negative() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(-1.0);
+            let expected = Negative(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
     }
 }
