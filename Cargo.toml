@@ -1,0 +1,6 @@
+[package]
+name = "reals-rs"
+version = "0.1.0"
+authors = ["Jon Wolski <jonwolski@gmail.com>"]
+
+[dependencies]
