@@ -75,7 +75,7 @@ impl Add<Positive> for Zero {
     type Output = Positive;
 
     fn add(self, other: Positive) -> Self::Output {
-       other
+        other
     }
 }
 
@@ -83,7 +83,7 @@ impl Add<Zero> for Zero {
     type Output = Zero;
 
     fn add(self, other: Zero) -> Self::Output {
-       other
+        other
     }
 }
 
@@ -91,7 +91,7 @@ impl Add<Negative> for Zero {
     type Output = Negative;
 
     fn add(self, other: Negative) -> Self::Output {
-       other
+        other
     }
 }
 
@@ -99,7 +99,7 @@ impl Sub<Positive> for Zero {
     type Output = Negative;
 
     fn sub(self, other: Positive) -> Self::Output {
-       Negative(self.0 - other.0)
+        Negative(self.0 - other.0)
     }
 }
 
@@ -107,7 +107,7 @@ impl Add for Negative {
     type Output = Negative;
 
     fn add(self, other: Self) -> Self::Output {
-       Negative(self.0 + other.0)
+        Negative(self.0 + other.0)
     }
 }
 
@@ -115,7 +115,7 @@ impl Add<Zero> for Negative {
     type Output = Negative;
 
     fn add(self, _other: Zero) -> Self::Output {
-      self
+        self
     }
 }
 
@@ -123,7 +123,7 @@ impl Add<Positive> for Negative {
     type Output = Negative;
 
     fn add(self, _other: Positive) -> Self::Output {
-      unimplemented!();
+        unimplemented!();
     }
 }
 
@@ -213,7 +213,7 @@ mod tests {
 
         #[test]
         fn plus_positive() {
-	    unimplemented!();
+            unimplemented!();
         }
 
         #[test]
