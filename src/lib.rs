@@ -8,15 +8,14 @@ use std::ops::Sub;
 
 #[macro_export]
 macro_rules! r64 {
-    (-0.0) => {Zero(-0.0)};
-    (0.0) => {Zero(0.0)};
     (0) => {Zero(0.0)};
-    (-0) => {Zero(0.0)};
-    (-$x:expr) => {Negative(-$x)};
-    ($x:expr) => {Positive($x)};
+    (-0) => {Zero(-0.0)};
+    (0.0) => {Zero(0.0)};
+    (-0.0) => {Zero(-0.0)};
+    (-$r:literal) => {Negative(-$r)};
+    ($r:literal) => {Positive($r)};
+    //    (-0.$(0)+) => {Zero(-0.0)};
 }
-
-
 
 //enum OptionReal {
 //    NaN,
@@ -233,5 +232,49 @@ mod tests {
             assert_eq!(r0 + r1, expected);
         }
 
+    }
+
+    mod macro_tests {
+        use super::*;
+
+        #[test]
+        fn one_zero() {
+            assert_eq!(Zero(0.0), r64!(0));
+        }
+
+        #[test]
+        fn one_zero_negative() {
+            assert_eq!(Zero(-0.0), r64!(-0));
+        }
+
+        #[test]
+        fn negative_zero() {
+            assert_eq!(Zero(-0.0), r64!(-0.0));
+        }
+
+        #[test]
+        fn one_trailing_zero() {
+            assert_eq!(Zero(0.0), r64!(0.0));
+        }
+
+        #[test]
+        fn positive_literal() {
+            assert_eq!(Positive(1.5), r64!(1.5));
+        }
+
+        #[test]
+        fn negative_literal() {
+            assert_eq!(Negative(-1.5), r64!(-1.5));
+        }
+
+        #[test]
+        fn nontrivial_literal() {
+            assert_eq!(Positive(123_456_3e1_2), r64!(123_456_3e1_2));
+        }
+
+        //#[test]
+        //fn trailing_zeros() {
+        //    assert_eq!(Zero(0.0), r64!(0.00000));
+        //}
     }
 }
