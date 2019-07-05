@@ -22,14 +22,6 @@ macro_rules! r64 {
 //    Real
 //}
 //
-//enum Real {
-//    Negative(f64),
-//    Positive(f64),
-//    Zero(f64),
-//}
-//
-//use Real::*;
-
 #[derive(Debug, PartialEq)]
 struct Positive(f64);
 
@@ -38,6 +30,19 @@ struct Negative(f64);
 
 #[derive(Debug, PartialEq)]
 struct Zero(f64);
+
+#[derive(Debug, PartialEq)]
+struct GenericReal(f64);
+
+#[derive(Debug, PartialEq)]
+enum Real {
+    Negative(f64),
+    Positive(f64),
+    Zero(f64),
+    GenericReal(f64),
+}
+use Real::*;
+
 
 impl Add for Positive {
     type Output = Self;
@@ -52,6 +57,14 @@ impl Add<Zero> for Positive {
 
     fn add(self, _other: Zero) -> Self::Output {
         self
+    }
+}
+
+impl Add<Real> for Real {
+    type Output = Self;
+
+    fn add(self, other: Real) -> Real {
+       Real(self.0 + other.0)
     }
 }
 
@@ -155,7 +168,10 @@ mod tests {
 
         #[test]
         fn plus_negative() {
-            unimplemented!();
+           let r0 = r64!(1.0);
+           let r1 = r64!(-2.0);
+           let expected = Real(1.0 + -2.0);
+           assert_eq!(r0 + r1, expected);
         }
 
         #[test]
@@ -178,6 +194,7 @@ mod tests {
             let expected = Positive(2.0 - -3.5);
             assert_eq!(r0 - r1, expected);
         }
+
     }
 
     mod zero {
@@ -214,6 +231,10 @@ mod tests {
         #[test]
         fn plus_positive() {
             unimplemented!();
+           // let r0 = r64!(-1.0);
+           // let r1 = r64!(2.0);
+           // let expected = Real(-1.0 + 2.0);
+           // assert_eq!(r0 + r1, expected);
         }
 
         #[test]
