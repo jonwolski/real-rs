@@ -1,7 +1,7 @@
 // TODO: use a macro like `Real!(n)` for literals of `Positive`, `Negative`, and `Zero` in code.
 // TODO: Implement `from` or `parse` for other instantiations.
 
-//use std::marker::PhantomData;
+use std::marker::PhantomData;
 use std::ops::Add;
 use std::ops::Sub;
 
@@ -29,6 +29,26 @@ macro_rules! r64 {
 //}
 //
 //use Real::*;
+
+enum Sign {
+    P, N, Z
+}
+
+use Sign::*;
+
+struct Real<S> {
+    val: f64,
+    sign: PhantomData<S>,
+}
+
+impl Add<Real<P>> for Real<P> {
+    type Output = Self;
+
+    fn add(self, other: Real<P>) -> Self::Output {
+        Real { val: self.val + other.val, P }
+    }
+
+}
 
 #[derive(Debug, PartialEq)]
 struct Positive(f64);
@@ -141,7 +161,7 @@ mod tests {
         fn plus_positive() {
             let r0 = r64!(2.0);
             let r1 = r64!(3.5);
-            let expected = Positive(2.0 + 3.5);
+            let expected = r64!(5.5);
             assert_eq!(r0 + r1, expected);
         }
 
@@ -149,7 +169,7 @@ mod tests {
         fn plus_zero() {
             let r0 = r64!(2.0);
             let r1 = r64!(0.0);
-            let expected = Positive(2.0 + 0.0);
+            let expected = r64!(2.0);
             assert_eq!(r0 + r1, expected);
         }
 
@@ -167,7 +187,7 @@ mod tests {
         fn minus_zero() {
             let r0 = r64!(2.0);
             let r1 = r64!(0.0);
-            let expected = Positive(2.0 - 0.0);
+            let expected = r64!(2.0);
             assert_eq!(r0 - r1, expected);
         }
 
@@ -175,7 +195,7 @@ mod tests {
         fn minus_negative() {
             let r0 = r64!(2.0);
             let r1 = r64!(-3.5);
-            let expected = Positive(2.0 - -3.5);
+            let expected = r64!(5.5);
             assert_eq!(r0 - r1, expected);
         }
     }
@@ -187,7 +207,7 @@ mod tests {
         fn plus_positive() {
             let r0 = r64!(0.0);
             let r1 = r64!(2.0);
-            let expected = Positive(0.0 + 2.0);
+            let expected = r64!(2.0);
             assert_eq!(r0 + r1, expected);
         }
 
@@ -195,7 +215,7 @@ mod tests {
         fn plus_zero() {
             let r0 = r64!(0.0);
             let r1 = r64!(0.0);
-            let expected = Zero(0.0 + 0.0);
+            let expected = r64!(0.0);
             assert_eq!(r0 + r1, expected);
         }
 
@@ -203,7 +223,7 @@ mod tests {
         fn plus_negative() {
             let r0 = r64!(0.0);
             let r1 = r64!(-1.0);
-            let expected = Negative(0.0 + -1.0);
+            let expected = r64!(-1.0);
             assert_eq!(r0 + r1, expected);
         }
     }
@@ -220,7 +240,7 @@ mod tests {
         fn plus_zero() {
             let r0 = r64!(-1.0);
             let r1 = r64!(0.0);
-            let expected = Negative(-1.0 + 0.0);
+            let expected = r64!(-1.0);
             assert_eq!(r0 + r1, expected);
         }
 
@@ -228,12 +248,12 @@ mod tests {
         fn plus_negative() {
             let r0 = r64!(-2.0);
             let r1 = r64!(-1.0);
-            let expected = Negative(-2.0 + -1.0);
+            let expected = r64!(-3.0);
             assert_eq!(r0 + r1, expected);
         }
 
     }
-
+/*
     mod macro_tests {
         use super::*;
 
@@ -277,4 +297,5 @@ mod tests {
         //    assert_eq!(Zero(0.0), r64!(0.00000));
         //}
     }
+    */
 }
