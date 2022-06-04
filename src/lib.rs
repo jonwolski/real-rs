@@ -30,6 +30,10 @@ macro_rules! r64 {
 //
 //use Real::*;
 
+// A real of unkown sign
+#[derive(Debug, PartialEq)]
+struct Real(f64);
+
 #[derive(Debug, PartialEq)]
 struct Positive(f64);
 
@@ -70,6 +74,14 @@ impl Sub<Negative> for Positive {
         Positive(self.0 - other.0)
     }
 }
+impl Sub<Positive> for Positive {
+    type Output = Real;
+
+    fn sub(self, other: Positive) -> Self::Output {
+        Real(self.0 - other.0)
+    }
+}
+
 
 impl Add<Positive> for Zero {
     type Output = Positive;
@@ -120,12 +132,21 @@ impl Add<Zero> for Negative {
 }
 
 impl Add<Positive> for Negative {
-    type Output = Negative;
+    type Output = Real;
 
-    fn add(self, _other: Positive) -> Self::Output {
-        unimplemented!();
+    fn add(self, other: Positive) -> Self::Output {
+        Real(self.0 + other.0)
     }
 }
+
+impl Add<Negative> for Positive {
+    type Output = Real;
+
+    fn add(self, other: Negative) -> Self::Output {
+        Real(self.0 + other.0)
+    }
+}
+
 
 
 
@@ -155,12 +176,18 @@ mod tests {
 
         #[test]
         fn plus_negative() {
-            unimplemented!();
+            let r0 = r64!(21.0);
+            let r1 = r64!(-1.0);
+            let expected = Real(21.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
         }
 
         #[test]
         fn minus_positive() {
-            unimplemented!();
+            let r0 = r64!(1.0);
+            let r1 = r64!(8.0);
+            let expected = Real(1.0 - 8.0);
+            assert_eq!(r0 - r1, expected);
         }
 
         #[test]
@@ -213,7 +240,10 @@ mod tests {
 
         #[test]
         fn plus_positive() {
-            unimplemented!();
+            let r0 = r64!(-1.0);
+            let r1 = r64!(21.0);
+            let expected = Real(-1.0 + 21.0);
+            assert_eq!(r0 + r1, expected);
         }
 
         #[test]
