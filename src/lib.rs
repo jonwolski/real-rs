@@ -1,4 +1,3 @@
-// TODO: use a macro like `Real!(n)` for literals of `Positive`, `Negative`, and `Zero` in code.
 // TODO: Implement `from` or `parse` for other instantiations.
 
 //use std::marker::PhantomData;
@@ -74,6 +73,7 @@ impl Sub<Negative> for Positive {
         Positive(self.0 - other.0)
     }
 }
+
 impl Sub<Positive> for Positive {
     type Output = Real;
 
@@ -82,6 +82,13 @@ impl Sub<Positive> for Positive {
     }
 }
 
+impl Sub<Real> for Positive {
+    type Output = Real;
+
+    fn sub(self, other: Real) -> Self::Output {
+        Real(self.0 - other.0)
+    }
+}
 
 impl Add<Positive> for Zero {
     type Output = Positive;
@@ -91,7 +98,7 @@ impl Add<Positive> for Zero {
     }
 }
 
-impl Add<Zero> for Zero {
+impl Add for Zero {
     type Output = Zero;
 
     fn add(self, other: Zero) -> Self::Output {
@@ -107,11 +114,43 @@ impl Add<Negative> for Zero {
     }
 }
 
+impl Add<Real> for Zero {
+    type Output = Real;
+
+    fn add(self, other: Real) -> Self::Output {
+        other
+    }
+}
+
 impl Sub<Positive> for Zero {
     type Output = Negative;
 
     fn sub(self, other: Positive) -> Self::Output {
         Negative(self.0 - other.0)
+    }
+}
+
+impl Sub<Negative> for Zero {
+    type Output = Positive;
+
+    fn sub(self, other: Negative) -> Self::Output {
+        Positive(self.0 - other.0)
+    }
+}
+
+impl Sub<Zero> for Zero {
+    type Output = Zero;
+
+    fn sub(self, _other: Zero) -> Self::Output {
+        self
+    }
+}
+
+impl Sub<Real> for Zero {
+    type Output = Real;
+
+    fn sub(self, other: Real) -> Self::Output {
+        Real(self.0 - other.0)
     }
 }
 
@@ -139,6 +178,14 @@ impl Add<Positive> for Negative {
     }
 }
 
+impl Add<Real> for Negative {
+    type Output = Real;
+
+    fn add(self, other: Real) -> Self::Output {
+        Real(self.0 + other.0)
+    }
+}
+
 impl Add<Negative> for Positive {
     type Output = Real;
 
@@ -148,6 +195,38 @@ impl Add<Negative> for Positive {
 }
 
 
+
+impl Add for Real {
+    type Output = Real;
+
+    fn add(self, other: Real) -> Self::Output {
+        Real(self.0 + other.0)
+    }
+}
+
+impl Add<Positive> for Real {
+    type Output = Real;
+
+    fn add(self, other: Positive) -> Self::Output {
+        Real(self.0 + other.0)
+    }
+}
+
+impl Add<Zero> for Real {
+    type Output = Real;
+
+    fn add(self, _other: Zero) -> Self::Output {
+        self
+    }
+}
+
+impl Add<Negative> for Real {
+    type Output = Real;
+
+    fn add(self, other: Negative) -> Self::Output {
+        Real(self.0 + other.0)
+    }
+}
 
 
 
@@ -183,10 +262,26 @@ mod tests {
         }
 
         #[test]
+        fn plus_real() {
+            let r0 = r64!(21.0);
+            let r1 = r64!(-1.0);
+            let expected = Real(21.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
         fn minus_positive() {
             let r0 = r64!(1.0);
             let r1 = r64!(8.0);
             let expected = Real(1.0 - 8.0);
+            assert_eq!(r0 - r1, expected);
+        }
+
+        #[test]
+        fn minus_real() {
+            let r0 = r64!(1.0);
+            let r1 = Real(-8.0);
+            let expected = Real(1.0 - -8.0);
             assert_eq!(r0 - r1, expected);
         }
 
@@ -233,6 +328,46 @@ mod tests {
             let expected = Negative(0.0 + -1.0);
             assert_eq!(r0 + r1, expected);
         }
+
+        #[test]
+        fn plus_real() {
+            let r0 = r64!(0.0);
+            let r1 = Real(1.0);
+            let expected = Real(0.0 + 1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_positive() {
+            let r0 = r64!(0.0);
+            let r1 = r64!(2.0);
+            let expected = Negative(0.0 - 2.0);
+            assert_eq!(r0 - r1, expected);
+        }
+
+        #[test]
+        fn minus_zero() {
+            let r0 = r64!(0.0);
+            let r1 = r64!(0.0);
+            let expected = Zero(0.0 - 0.0);
+            assert_eq!(r0 - r1, expected);
+        }
+
+        #[test]
+        fn minus_negative() {
+            let r0 = r64!(0.0);
+            let r1 = r64!(-1.0);
+            let expected = Positive(0.0 - -1.0);
+            assert_eq!(r0 - r1, expected);
+        }
+
+        #[test]
+        fn minus_real() {
+            let r0 = r64!(0.0);
+            let r1 = Real(1.0);
+            let expected = Real(0.0 - 1.0);
+            assert_eq!(r0 - r1, expected);
+        }
     }
 
     mod negative {
@@ -262,6 +397,113 @@ mod tests {
             assert_eq!(r0 + r1, expected);
         }
 
+        #[test]
+        fn plus_real() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(-1.0);
+            let expected = Negative(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_zero() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(0.0);
+            let expected = Negative(-2.0 - 0.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_positive() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(1.0);
+            let expected = Real(-2.0 + 1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_negative() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(-1.0);
+            let expected = Negative(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_real() {
+            let r0 = r64!(-2.0);
+            let r1 = Real(-1.0);
+            let expected = Real(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+    }
+
+    mod real {
+        use super::*;
+
+        #[test]
+        fn plus_real() {
+            let r0 = Real(-2.0);
+            let r1 = Real(-1.0);
+            let expected = Real(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn plus_positive() {
+            let r0 = Real(-1.0);
+            let r1 = r64!(21.0);
+            let expected = Real(-1.0 + 21.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn plus_zero() {
+            let r0 = Real(-1.0);
+            let r1 = r64!(0.0);
+            let expected = Real(-1.0 + 0.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn plus_negative() {
+            let r0 = Real(-2.0);
+            let r1 = r64!(-1.0);
+            let expected = Real(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_zero() {
+            let r0 = Real(-2.0);
+            let r1 = r64!(0.0);
+            let expected = Real(-2.0 - 0.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_positive() {
+            let r0 = Real(-2.0);
+            let r1 = r64!(1.0);
+            let expected = Real(-2.0 + 1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_negative() {
+            let r0 = Real(-2.0);
+            let r1 = r64!(-1.0);
+            let expected = Real(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn minus_real() {
+            let r0 = Real(-2.0);
+            let r1 = Real(-1.0);
+            let expected = Real(-2.0 + -1.0);
+            assert_eq!(r0 + r1, expected);
+        }
     }
 
     mod macro_tests {
@@ -302,9 +544,11 @@ mod tests {
             assert_eq!(Positive(123_456_3e1_2), r64!(123_456_3e1_2));
         }
 
-        //#[test]
-        //fn trailing_zeros() {
-        //    assert_eq!(Zero(0.0), r64!(0.00000));
-        //}
+        #[test]
+        #[ignore]
+        fn trailing_zeros() {
+            // won't compile
+            // assert_eq!(Zero(0.0), r64!(0.00000));
+        }
     }
 }
