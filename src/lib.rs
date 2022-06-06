@@ -1,9 +1,6 @@
 // TODO: Implement `from` or `parse` for other instantiations.
 
 //use std::marker::PhantomData;
-use std::ops::Add;
-use std::ops::Sub;
-
 
 #[macro_export]
 macro_rules! r64 {
@@ -29,205 +26,78 @@ macro_rules! r64 {
 //
 //use Real::*;
 
+
+trait Float {}
+impl Float for f32 {}
+impl Float for f64 {}
+
 // A real of unkown sign
 #[derive(Debug, PartialEq)]
-struct Real(f64);
+struct Real<T:Float>(T);
 
 #[derive(Debug, PartialEq)]
-struct Positive(f64);
+struct Positive<T:Float>(T);
 
 #[derive(Debug, PartialEq)]
-struct Negative(f64);
+struct Negative<T:Float>(T);
 
 #[derive(Debug, PartialEq)]
-struct Zero(f64);
+struct Zero<T:Float>(T);
 
-impl Add for Positive {
-    type Output = Self;
 
-    fn add(self, other: Self) -> Self::Output {
-        Positive(self.0 + other.0)
-    }
+macro_rules! op_rules {
+	( $op_trait:ident $op_fun:ident $op_sym:tt [$( $x:ident $y:ident -> $result:ident)+]) => {
+        $(
+		impl<T> std::ops::$op_trait<$y<T>> for $x<T>
+          where
+            T: Float + std::ops::$op_trait<Output = T>
+        {
+			type Output = $result<T>;
+			fn $op_fun(self, other: $y<T>) -> Self::Output {
+				$result::<T>(self.0 $op_sym other.0)
+			}
+		}
+        )+
+	};
 }
 
-impl Add<Zero> for Positive {
-    type Output = Self;
+op_rules!(Add add + [
+  Positive Positive -> Positive
+  Positive Negative -> Real
+  Positive Zero -> Positive
+  Positive Real -> Real
+  Negative Positive -> Real
+  Negative Negative -> Negative
+  Negative Zero -> Negative
+  Negative Real -> Real
+  Zero Positive -> Positive
+  Zero Negative -> Negative
+  Zero Zero -> Zero
+  Zero Real -> Real
+  Real Positive -> Real
+  Real Negative -> Real
+  Real Zero -> Real
+  Real Real -> Real
+]);
 
-    fn add(self, _other: Zero) -> Self::Output {
-        self
-    }
-}
-
-impl Sub<Zero> for Positive {
-    type Output = Self;
-
-    fn sub(self, _other: Zero) -> Self::Output {
-        self
-    }
-}
-
-impl Sub<Negative> for Positive {
-    type Output = Self;
-
-    fn sub(self, other: Negative) -> Self::Output {
-        Positive(self.0 - other.0)
-    }
-}
-
-impl Sub<Positive> for Positive {
-    type Output = Real;
-
-    fn sub(self, other: Positive) -> Self::Output {
-        Real(self.0 - other.0)
-    }
-}
-
-impl Sub<Real> for Positive {
-    type Output = Real;
-
-    fn sub(self, other: Real) -> Self::Output {
-        Real(self.0 - other.0)
-    }
-}
-
-impl Add<Positive> for Zero {
-    type Output = Positive;
-
-    fn add(self, other: Positive) -> Self::Output {
-        other
-    }
-}
-
-impl Add for Zero {
-    type Output = Zero;
-
-    fn add(self, other: Zero) -> Self::Output {
-        other
-    }
-}
-
-impl Add<Negative> for Zero {
-    type Output = Negative;
-
-    fn add(self, other: Negative) -> Self::Output {
-        other
-    }
-}
-
-impl Add<Real> for Zero {
-    type Output = Real;
-
-    fn add(self, other: Real) -> Self::Output {
-        other
-    }
-}
-
-impl Sub<Positive> for Zero {
-    type Output = Negative;
-
-    fn sub(self, other: Positive) -> Self::Output {
-        Negative(self.0 - other.0)
-    }
-}
-
-impl Sub<Negative> for Zero {
-    type Output = Positive;
-
-    fn sub(self, other: Negative) -> Self::Output {
-        Positive(self.0 - other.0)
-    }
-}
-
-impl Sub<Zero> for Zero {
-    type Output = Zero;
-
-    fn sub(self, _other: Zero) -> Self::Output {
-        self
-    }
-}
-
-impl Sub<Real> for Zero {
-    type Output = Real;
-
-    fn sub(self, other: Real) -> Self::Output {
-        Real(self.0 - other.0)
-    }
-}
-
-impl Add for Negative {
-    type Output = Negative;
-
-    fn add(self, other: Self) -> Self::Output {
-        Negative(self.0 + other.0)
-    }
-}
-
-impl Add<Zero> for Negative {
-    type Output = Negative;
-
-    fn add(self, _other: Zero) -> Self::Output {
-        self
-    }
-}
-
-impl Add<Positive> for Negative {
-    type Output = Real;
-
-    fn add(self, other: Positive) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
-impl Add<Real> for Negative {
-    type Output = Real;
-
-    fn add(self, other: Real) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
-impl Add<Negative> for Positive {
-    type Output = Real;
-
-    fn add(self, other: Negative) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
-
-
-impl Add for Real {
-    type Output = Real;
-
-    fn add(self, other: Real) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
-impl Add<Positive> for Real {
-    type Output = Real;
-
-    fn add(self, other: Positive) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
-impl Add<Zero> for Real {
-    type Output = Real;
-
-    fn add(self, _other: Zero) -> Self::Output {
-        self
-    }
-}
-
-impl Add<Negative> for Real {
-    type Output = Real;
-
-    fn add(self, other: Negative) -> Self::Output {
-        Real(self.0 + other.0)
-    }
-}
-
+op_rules!(Sub sub - [
+  Positive Positive -> Real
+  Positive Negative -> Positive
+  Positive Zero -> Positive
+  Positive Real -> Real
+  Negative Positive -> Negative
+  Negative Negative -> Real
+  Negative Zero -> Negative
+  Negative Real -> Real
+  Zero Positive -> Negative
+  Zero Negative -> Positive
+  Zero Zero -> Zero
+  Zero Real -> Real
+  Real Positive -> Real
+  Real Negative -> Real
+  Real Zero -> Real
+  Real Real -> Real
+]);
 
 
 #[cfg(test)]
