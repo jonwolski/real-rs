@@ -46,19 +46,19 @@ struct Zero<T:Float>(T);
 
 
 macro_rules! op_rules {
-	( $op_trait:ident $op_fun:ident $op_sym:tt [$( $x:ident $y:ident -> $result:ident)+]) => {
+    ( $op_trait:ident $op_fun:ident $op_sym:tt [$( $x:ident $y:ident -> $result:ident)+]) => {
         $(
-		impl<T> std::ops::$op_trait<$y<T>> for $x<T>
+        impl<T> std::ops::$op_trait<$y<T>> for $x<T>
           where
             T: Float + std::ops::$op_trait<Output = T>
         {
-			type Output = $result<T>;
-			fn $op_fun(self, other: $y<T>) -> Self::Output {
-				$result::<T>(self.0 $op_sym other.0)
-			}
-		}
+            type Output = $result<T>;
+            fn $op_fun(self, other: $y<T>) -> Self::Output {
+                $result::<T>(self.0 $op_sym other.0)
+            }
+        }
         )+
-	};
+    };
 }
 
 op_rules!(Add add + [
@@ -99,6 +99,24 @@ op_rules!(Sub sub - [
   Real Real -> Real
 ]);
 
+op_rules!(Mul mul * [
+  Positive Positive -> Positive
+  Positive Negative -> Negative
+  Positive Zero -> Zero
+  Positive Real -> Real
+  Negative Positive -> Negative
+  Negative Negative -> Positive
+  Negative Zero -> Zero
+  Negative Real -> Real
+  Zero Positive -> Zero
+  Zero Negative -> Zero
+  Zero Zero -> Zero
+  Zero Real -> Zero
+  Real Positive -> Real
+  Real Negative -> Real
+  Real Zero -> Zero
+  Real Real -> Real
+]);
 
 #[cfg(test)]
 mod tests {
@@ -305,6 +323,14 @@ mod tests {
             let r1 = Real(-1.0);
             let expected = Real(-2.0 + -1.0);
             assert_eq!(r0 + r1, expected);
+        }
+
+        #[test]
+        fn times_negative() {
+            let r0 = r64!(-2.0);
+            let r1 = r64!(-2.0);
+            let expected = Positive(-2.0 * -2.0);
+            assert_eq!(r0 * r1, expected);
         }
     }
 
